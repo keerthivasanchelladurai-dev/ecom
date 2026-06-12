@@ -55,7 +55,7 @@ class User(UserMixin):
 
 def load_user_by_id(user_id):
     """Flask-Login user loader callback."""
-    from app import get_db
+    from database import get_db
     db = get_db()
     try:
         user_doc = db.users.find_one({'_id': ObjectId(user_id)})

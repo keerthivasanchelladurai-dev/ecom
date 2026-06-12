@@ -13,11 +13,6 @@ mongo_client = None
 db = None
 
 
-def get_db():
-    """Return the MongoDB database instance."""
-    from flask import current_app
-    return current_app.mongo_db
-
 
 def create_app():
     """Application factory."""

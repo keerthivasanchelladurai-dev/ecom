@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from models.wishlist import toggle_wishlist, get_wishlist_items
-from app import get_db
+from database import get_db
 
 wishlist_bp = Blueprint('wishlist', __name__)
 

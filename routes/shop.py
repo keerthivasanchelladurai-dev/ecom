@@ -3,7 +3,7 @@ from flask_login import current_user
 from models.product import get_products, get_product_by_id, get_related_products
 from models.category import get_all_categories, get_category_by_id
 from models.wishlist import get_wishlist_product_ids
-from app import get_db
+from database import get_db
 import math
 
 shop_bp = Blueprint('shop', __name__)

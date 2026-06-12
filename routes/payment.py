@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from models.order import get_order_by_id, update_order_status
 from models.payment import get_payment_by_order, complete_payment
-from app import get_db
+from database import get_db
 
 payment_bp = Blueprint('payment', __name__)
 

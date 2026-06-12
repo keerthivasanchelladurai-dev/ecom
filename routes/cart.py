@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import login_required, current_user
 from models.cart import add_to_cart, update_cart_item, remove_cart_item, get_cart_items
-from app import get_db
+from database import get_db
 
 cart_bp = Blueprint('cart', __name__)
 

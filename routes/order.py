@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from models.cart import get_cart_items, clear_cart
 from models.order import create_order, get_user_orders, get_order_by_id, get_order_items
 from models.payment import create_payment, get_payment_by_order
-from app import get_db
+from database import get_db
 from bson import ObjectId
 from datetime import datetime, timezone
 

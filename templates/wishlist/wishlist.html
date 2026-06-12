@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}My Wishlist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="wishlist-page fade-in">
+        <h1>My Wishlist</h1>
+
+        {% if items %}
+        <div class="product-grid stagger">
+            {% set wishlist_ids = [] %}
+            {% for item in items %}
+                {% set _ = wishlist_ids.append(item.product._id|string) %}
+                {% set product = item.product %}
+                {% include 'shop/_product_card.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">♥</div>
+            <h3>Your wishlist is empty</h3>
+            <p>Save items you love to your wishlist to buy them later.</p>
+            <a href="{{ url_for('shop.products') }}" class="btn btn-primary">Discover Products</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

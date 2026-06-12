@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Manage Categories{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <!-- Reusing sidebar links -->
+        <div class="sidebar-label">Main Menu</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('admin.dashboard') }}"><i data-lucide="layout-dashboard" style="width:18px;height:18px"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('admin.orders') }}"><i data-lucide="shopping-bag" style="width:18px;height:18px"></i> Orders</a></li>
+            <li><a href="{{ url_for('admin.products') }}"><i data-lucide="package" style="width:18px;height:18px"></i> Products</a></li>
+            <li><a href="{{ url_for('admin.categories') }}" class="active"><i data-lucide="grid" style="width:18px;height:18px"></i> Categories</a></li>
+            <li><a href="{{ url_for('admin.customers') }}"><i data-lucide="users" style="width:18px;height:18px"></i> Customers</a></li>
+        </ul>
+        <div class="sidebar-label">Storefront</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('shop.home') }}"><i data-lucide="external-link" style="width:18px;height:18px"></i> View Store</a></li>
+        </ul>
+    </aside>
+
+    <div class="admin-content fade-in">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h1>Categories</h1>
+                <p>Manage product categories</p>
+            </div>
+            <a href="{{ url_for('admin.add_category') }}" class="btn btn-primary">
+                <i data-lucide="plus" style="width:18px;height:18px"></i> Add Category
+            </a>
+        </div>
+
+        <div class="admin-table-card">
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Category Name</th>
+                            <th>Description</th>
+                            <th>Products</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in categories %}
+                        <tr>
+                            <td style="font-weight:600; color:var(--text-primary)">{{ cat.name }}</td>
+                            <td>{{ cat.description }}</td>
+                            <td><span class="badge" style="background:var(--bg-input); padding:4px 10px; border-radius:12px;">{{ cat.product_count }}</span></td>
+                            <td>
+                                <div style="display:flex; gap:8px;">
+                                    <a href="{{ url_for('admin.edit_category', category_id=cat._id|string) }}" class="btn btn-ghost btn-sm" title="Edit">
+                                        <i data-lucide="edit" style="width:16px;height:16px"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin.delete_category_route', category_id=cat._id|string) }}" style="display:inline;">
+                                        <button type="button" class="btn btn-ghost btn-sm text-danger" title="Delete" onclick="confirmDelete(this.form, '{{ cat.name|replace("'", "\\'") }}')">
+                                            <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Manage Orders{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <!-- Reusing sidebar links -->
+        <div class="sidebar-label">Main Menu</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('admin.dashboard') }}"><i data-lucide="layout-dashboard" style="width:18px;height:18px"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('admin.orders') }}" class="active"><i data-lucide="shopping-bag" style="width:18px;height:18px"></i> Orders</a></li>
+            <li><a href="{{ url_for('admin.products') }}"><i data-lucide="package" style="width:18px;height:18px"></i> Products</a></li>
+            <li><a href="{{ url_for('admin.categories') }}"><i data-lucide="grid" style="width:18px;height:18px"></i> Categories</a></li>
+            <li><a href="{{ url_for('admin.customers') }}"><i data-lucide="users" style="width:18px;height:18px"></i> Customers</a></li>
+        </ul>
+        <div class="sidebar-label">Storefront</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('shop.home') }}"><i data-lucide="external-link" style="width:18px;height:18px"></i> View Store</a></li>
+        </ul>
+    </aside>
+
+    <div class="admin-content fade-in">
+        <div class="page-header">
+            <h1>Orders</h1>
+            <p>Manage customer orders</p>
+        </div>
+
+        <div class="admin-table-card">
+            <div class="admin-table-header">
+                <form method="GET" action="{{ url_for('admin.orders') }}" style="display:flex; gap:12px; align-items:center;">
+                    <select name="status" class="form-control" style="width:200px;" onchange="this.form.submit()">
+                        <option value="">All Statuses</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="shipped" {% if status_filter == 'shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </form>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td style="font-weight:600;">#{{ order.order_number }}</td>
+                            <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                            <td>
+                                <div>{{ order.user.full_name }}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted)">{{ order.user.email }}</div>
+                            </td>
+                            <td style="font-weight:600;">₹{{ '{:,.0f}'.format(order.total) }}</td>
+                            <td><span class="status-badge {{ order.status }}">{{ order.status }}</span></td>
+                            <td>
+                                <a href="{{ url_for('admin.order_detail', order_id=order._id|string) }}" class="btn btn-outline btn-sm">Manage</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if total_pages > 1 %}
+            <div style="padding:20px; border-top:1px solid var(--border-light);">
+                <div class="pagination" style="margin-top:0;">
+                    {% if page > 1 %}
+                    <a href="{{ url_for('admin.orders', status=status_filter, page=page-1) }}">← Prev</a>
+                    {% endif %}
+                    <span class="active">{{ page }}</span>
+                    {% if page < total_pages %}
+                    <a href="{{ url_for('admin.orders', status=status_filter, page=page+1) }}">Next →</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

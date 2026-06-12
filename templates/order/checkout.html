@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="checkout-page fade-in">
+        <h1>Checkout</h1>
+
+        <form method="POST" action="{{ url_for('order.place_order') }}">
+            <div class="checkout-layout">
+                <!-- Left: Forms -->
+                <div>
+                    <!-- Shipping Address -->
+                    <div class="checkout-section">
+                        <h2><i data-lucide="map-pin" style="width:20px;height:20px;color:var(--primary)"></i> Shipping Address</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="full_name">Full Name</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ current_user.full_name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="phone">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ current_user.phone }}" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="address_line">Address Line</label>
+                            <input type="text" class="form-control" id="address_line" name="address_line" value="{{ current_user.address }}" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="city">City</label>
+                                <input type="text" class="form-control" id="city" name="city" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="state">State</label>
+                                <input type="text" class="form-control" id="state" name="state" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="pincode">Pincode / ZIP</label>
+                            <input type="text" class="form-control" id="pincode" name="pincode" required>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="checkout-section">
+                        <h2><i data-lucide="credit-card" style="width:20px;height:20px;color:var(--primary)"></i> Payment Method</h2>
+                        <div class="payment-methods">
+                            <label class="payment-option selected">
+                                <input type="radio" name="payment_method" value="online" checked>
+                                <div class="pm-info">
+                                    <h4>Online Payment</h4>
+                                    <p>Pay securely with Credit Card, Debit Card, or Net Banking</p>
+                                </div>
+                                <i data-lucide="shield-check" style="margin-left:auto;color:var(--success)"></i>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="cod">
+                                <div class="pm-info">
+                                    <h4>Cash on Delivery</h4>
+                                    <p>Pay with cash upon delivery</p>
+                                </div>
+                                <i data-lucide="banknote" style="margin-left:auto;color:var(--text-muted)"></i>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Summary -->
+                <div class="cart-summary">
+                    <h3>Order Summary</h3>
+                    <div class="cart-items" style="margin-bottom:20px;">
+                        {% for item in items %}
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px;">
+                            <span>{{ item.quantity }}x {{ item.product.name[:30] }}...</span>
+                            <span>₹{{ '{:,.0f}'.format(item.subtotal) }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="summary-row" style="border-top:1px solid var(--border-light); padding-top:16px;">
+                        <span>Subtotal</span>
+                        <span>₹{{ '{:,.0f}'.format(total) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span>{% if total > 999 %}Free{% else %}₹150{% endif %}</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total to Pay</span>
+                        <span>₹{{ '{:,.0f}'.format(total + (0 if total > 999 else 150)) }}</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg mt-4">Place Order</button>
+                    <p style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin-top:12px;">
+                        <i data-lucide="lock" style="width:12px;height:12px;"></i> Secure Checkout Process
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

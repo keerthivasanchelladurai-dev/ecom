@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="cart-page fade-in">
+        <h1>Your Shopping Cart</h1>
+
+        {% if items %}
+        <div class="cart-layout">
+            <!-- Items -->
+            <div class="cart-items">
+                {% for item in items %}
+                <div class="cart-item" id="cart-item-{{ item._id }}">
+                    <div class="cart-item-image">
+                        {% if item.product.image_url %}
+                        <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
+                        {% else %}
+                        <img src="https://placehold.co/200x200/1A1A2E/6C5CE7?text={{ item.product.name[:5]|urlencode }}" alt="{{ item.product.name }}">
+                        {% endif %}
+                    </div>
+                    <div class="cart-item-info">
+                        <h3><a href="{{ url_for('shop.product_detail', product_id=item.product._id|string) }}">{{ item.product.name }}</a></h3>
+                        <div class="item-price">₹{{ '{:,.0f}'.format(item.product.price) }}</div>
+                        <div class="cart-item-actions">
+                            <div class="quantity-selector" style="margin-bottom:0;">
+                                <button type="button" class="qty-minus" onclick="updateCartQuantity('{{ item._id }}', parseInt(this.nextElementSibling.value) - 1)">−</button>
+                                <input type="number" class="qty-input" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" readonly>
+                                <button type="button" class="qty-plus" onclick="updateCartQuantity('{{ item._id }}', parseInt(this.previousElementSibling.value) + 1)">+</button>
+                            </div>
+                            <button class="btn btn-ghost" onclick="removeFromCart('{{ item._id }}')" style="color:var(--danger)">
+                                <i data-lucide="trash-2" style="width:16px;height:16px"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                    <div class="cart-item-subtotal">
+                        <div class="subtotal-label">Subtotal</div>
+                        <div class="subtotal-price">₹{{ '{:,.0f}'.format(item.subtotal) }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Summary -->
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-row">
+                    <span>Subtotal ({{ items|length }} items)</span>
+                    <span>₹{{ '{:,.0f}'.format(total) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping Estimate</span>
+                    <span>{% if total > 999 %}Free{% else %}₹150{% endif %}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax Estimate</span>
+                    <span>Calculated at checkout</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span>₹{{ '{:,.0f}'.format(total + (0 if total > 999 else 150)) }}</span>
+                </div>
+                <a href="{{ url_for('order.checkout') }}" class="btn btn-primary btn-block btn-lg mt-4">
+                    Proceed to Checkout
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🛒</div>
+            <h3>Your cart is empty</h3>
+            <p>Looks like you haven't added anything to your cart yet.</p>
+            <a href="{{ url_for('shop.products') }}" class="btn btn-primary">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

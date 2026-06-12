@@ -1,0 +1,52 @@
+<!-- Product Card Partial — included in grids -->
+<div class="card product-card">
+    <div class="product-image">
+        {% if product.compare_price and product.compare_price > product.price %}
+        <span class="product-badge sale">Sale</span>
+        {% elif product.featured %}
+        <span class="product-badge featured">Featured</span>
+        {% endif %}
+
+        <a href="{{ url_for('shop.product_detail', product_id=product._id|string) }}">
+            {% if product.image_url %}
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" loading="lazy">
+            {% else %}
+            <img src="https://placehold.co/400x400/1A1A2E/6C5CE7?text={{ product.name[:10]|urlencode }}" alt="{{ product.name }}" loading="lazy">
+            {% endif %}
+        </a>
+
+        <div class="product-actions">
+            <button onclick="toggleWishlist('{{ product._id|string }}', this)" class="{% if product._id|string in wishlist_ids %}wishlisted{% endif %}" title="Wishlist">
+                {% if product._id|string in wishlist_ids %}♥{% else %}♡{% endif %}
+            </button>
+            <button onclick="addToCart('{{ product._id|string }}')" title="Add to Cart">
+                🛒
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <span class="product-category">
+            {% if product.category_id %}
+                {% set cat_doc = [] %}
+                {{ '' }}
+            {% endif %}
+            {{ product.get('category_name', '') }}
+        </span>
+        <h3 class="product-name">
+            <a href="{{ url_for('shop.product_detail', product_id=product._id|string) }}">{{ product.name }}</a>
+        </h3>
+        <div class="product-rating">
+            <span class="stars">
+                {% for i in range(5) %}{% if i < product.rating|int %}★{% else %}☆{% endif %}{% endfor %}
+            </span>
+            <span class="count">{{ '%.1f'|format(product.rating) }}</span>
+        </div>
+        <div class="product-price">
+            <span class="current">₹{{ '{:,.0f}'.format(product.price) }}</span>
+            {% if product.compare_price and product.compare_price > product.price %}
+            <span class="original">₹{{ '{:,.0f}'.format(product.compare_price) }}</span>
+            <span class="discount">{{ ((1 - product.price/product.compare_price) * 100)|int }}% off</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

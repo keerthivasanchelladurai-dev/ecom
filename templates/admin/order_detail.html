@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block title %}Manage Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <!-- Reusing sidebar links -->
+        <div class="sidebar-label">Main Menu</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('admin.dashboard') }}"><i data-lucide="layout-dashboard" style="width:18px;height:18px"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('admin.orders') }}" class="active"><i data-lucide="shopping-bag" style="width:18px;height:18px"></i> Orders</a></li>
+            <li><a href="{{ url_for('admin.products') }}"><i data-lucide="package" style="width:18px;height:18px"></i> Products</a></li>
+            <li><a href="{{ url_for('admin.categories') }}"><i data-lucide="grid" style="width:18px;height:18px"></i> Categories</a></li>
+            <li><a href="{{ url_for('admin.customers') }}"><i data-lucide="users" style="width:18px;height:18px"></i> Customers</a></li>
+        </ul>
+        <div class="sidebar-label">Storefront</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('shop.home') }}"><i data-lucide="external-link" style="width:18px;height:18px"></i> View Store</a></li>
+        </ul>
+    </aside>
+
+    <div class="admin-content fade-in">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+                <a href="{{ url_for('admin.orders') }}" style="font-size:0.85rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px; margin-bottom:8px;">
+                    <i data-lucide="arrow-left" style="width:14px;height:14px"></i> Back to Orders
+                </a>
+                <h1>Order #{{ order.order_number }}</h1>
+                <p>Placed on {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <span style="font-size:0.9rem; font-weight:600;">Status:</span>
+                <span class="status-badge {{ order.status }}">{{ order.status }}</span>
+                <a href="{{ url_for('order.invoice', order_id=order._id|string) }}" target="_blank" class="btn btn-outline btn-sm" style="margin-left:8px;">
+                    <i data-lucide="printer" style="width:16px;height:16px"></i> Invoice
+                </a>
+            </div>
+        </div>
+
+        <div class="checkout-layout">
+            <!-- Left Column: Items & Details -->
+            <div>
+                <!-- Items -->
+                <div class="admin-table-card" style="margin-bottom:24px;">
+                    <div class="admin-table-header" style="padding:16px 20px;">
+                        <h2 style="font-size:1rem;">Items ({{ items|length }})</h2>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    <div class="product-cell">
+                                        {% if item.product_image %}
+                                        <img src="{{ item.product_image }}" alt="">
+                                        {% else %}
+                                        <img src="https://placehold.co/40x40/1A1A2E/6C5CE7?text=P" alt="">
+                                        {% endif %}
+                                        <a href="{{ url_for('shop.product_detail', product_id=item.product_id|string) }}" target="_blank" style="font-weight:600; color:var(--text-primary);">
+                                            {{ item.product_name }}
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>₹{{ '{:,.0f}'.format(item.price) }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td style="font-weight:600;">₹{{ '{:,.0f}'.format(item.price * item.quantity) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Update Status Form -->
+                <div class="admin-table-card" style="padding:24px;">
+                    <h3 style="font-size:1rem; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="activity" style="width:18px;height:18px;color:var(--primary)"></i> Update Order Status
+                    </h3>
+                    <form method="POST" action="{{ url_for('admin.update_status', order_id=order._id|string) }}" style="display:flex; gap:16px; align-items:flex-end;">
+                        <div class="form-group" style="margin-bottom:0; flex:1;">
+                            <label class="form-label">Order Status</label>
+                            <select name="status" class="form-control">
+                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Customer & Payment -->
+            <div>
+                <!-- Customer Details -->
+                <div class="admin-table-card" style="padding:20px; margin-bottom:24px;">
+                    <h3 style="font-size:1rem; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="user" style="width:16px;height:16px;color:var(--secondary)"></i> Customer
+                    </h3>
+                    <div style="font-size:0.875rem;">
+                        <p style="font-weight:600; font-size:1rem; margin-bottom:4px;">{{ order.user.full_name or order.user.username }}</p>
+                        <p style="color:var(--text-secondary); margin-bottom:12px;"><a href="mailto:{{ order.user.email }}">{{ order.user.email }}</a></p>
+                        <p style="color:var(--text-secondary);"><i data-lucide="phone" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> {{ order.user.phone or 'N/A' }}</p>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="admin-table-card" style="padding:20px; margin-bottom:24px;">
+                    <h3 style="font-size:1rem; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="map-pin" style="width:16px;height:16px;color:var(--accent)"></i> Shipping Address
+                    </h3>
+                    <div style="font-size:0.875rem; color:var(--text-secondary); line-height:1.6;">
+                        <strong style="color:var(--text-primary);">{{ order.shipping_address.full_name }}</strong><br>
+                        {{ order.shipping_address.address_line }}<br>
+                        {{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.pincode }}<br>
+                        Phone: {{ order.shipping_address.phone }}
+                    </div>
+                </div>
+
+                <!-- Payment Info -->
+                <div class="admin-table-card" style="padding:20px; margin-bottom:24px;">
+                    <h3 style="font-size:1rem; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="credit-card" style="width:16px;height:16px;color:var(--success)"></i> Payment Information
+                    </h3>
+                    <div style="font-size:0.875rem; color:var(--text-secondary); line-height:1.6;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span>Method:</span>
+                            <span style="font-weight:600; color:var(--text-primary);">{{ 'Cash on Delivery' if order.payment_method == 'cod' else 'Online Payment' }}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span>Status:</span>
+                            <span class="status-badge {{ payment.status }}">{{ payment.status }}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span>Transaction ID:</span>
+                            <span style="font-family:monospace;">{{ payment.transaction_id }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="admin-table-card" style="padding:20px;">
+                    <div class="summary-row" style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.875rem;">
+                        <span>Subtotal</span>
+                        <span>₹{{ '{:,.0f}'.format(order.total) }}</span>
+                    </div>
+                    <div class="summary-row" style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:0.875rem;">
+                        <span>Shipping</span>
+                        <span>{% if order.total > 999 %}Free{% else %}₹150{% endif %}</span>
+                    </div>
+                    <div class="summary-total" style="display:flex; justify-content:space-between; padding-top:12px; border-top:1px solid var(--border-light); font-size:1.15rem; font-weight:700;">
+                        <span>Total Paid</span>
+                        <span style="color:var(--primary-light);">₹{{ '{:,.0f}'.format(order.total + (0 if order.total > 999 else 150)) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

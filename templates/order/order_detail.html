@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Order {{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h1>Order Details</h1>
+            <p>#{{ order.order_number }} • Placed on {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+        </div>
+        <div>
+            <a href="{{ url_for('order.invoice', order_id=order._id|string) }}" target="_blank" class="btn btn-outline">
+                <i data-lucide="printer" style="width:16px;height:16px"></i> Print Invoice
+            </a>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="checkout-section">
+        <h2 style="margin-bottom:0; border:none;">Order Status: <span class="status-badge {{ order.status }}">{{ order.status }}</span></h2>
+        <div class="order-timeline">
+            {% set statuses = ['pending', 'confirmed', 'shipped', 'delivered'] %}
+            {% set current_index = statuses.index(order.status) if order.status in statuses else -1 %}
+
+            {% for st in statuses %}
+            {% set is_completed = loop.index0 < current_index %}
+            {% set is_active = loop.index0 == current_index %}
+            <div class="timeline-step {% if is_completed %}completed{% endif %} {% if is_active %}active{% endif %}">
+                <div class="step-dot">
+                    {% if is_completed %}✓{% else %}{{ loop.index }}{% endif %}
+                </div>
+                <div class="step-label">{{ st }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="checkout-layout">
+        <!-- Items -->
+        <div>
+            <div class="checkout-section">
+                <h2>Items Ordered</h2>
+                <div class="cart-items">
+                    {% for item in items %}
+                    <div class="cart-item" style="padding:16px; border-radius:8px; border:1px solid var(--border-light);">
+                        <div class="cart-item-image" style="width:70px; height:70px;">
+                            {% if item.product_image %}
+                            <img src="{{ item.product_image }}" alt="{{ item.product_name }}">
+                            {% else %}
+                            <div style="width:100%; height:100%; background:var(--bg-surface);"></div>
+                            {% endif %}
+                        </div>
+                        <div class="cart-item-info">
+                            <h3 style="font-size:0.95rem;">
+                                <a href="{{ url_for('shop.product_detail', product_id=item.product_id|string) }}">{{ item.product_name }}</a>
+                            </h3>
+                            <div class="item-price">₹{{ '{:,.0f}'.format(item.price) }}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">Qty: {{ item.quantity }}</div>
+                        </div>
+                        <div class="cart-item-subtotal">
+                            <div class="subtotal-price" style="font-size:1rem;">₹{{ '{:,.0f}'.format(item.price * item.quantity) }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Details -->
+        <div>
+            <div class="checkout-section" style="padding:20px;">
+                <h3 style="font-size:1rem; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-light);">Order Summary</h3>
+                <div class="summary-row" style="margin-bottom:8px;">
+                    <span>Subtotal</span>
+                    <span>₹{{ '{:,.0f}'.format(order.total) }}</span>
+                </div>
+                <div class="summary-row" style="margin-bottom:8px;">
+                    <span>Shipping</span>
+                    <span>{% if order.total > 999 %}Free{% else %}₹150{% endif %}</span>
+                </div>
+                <div class="summary-total" style="font-size:1.25rem; border-color:var(--border-light); padding-top:12px; margin-top:12px;">
+                    <span>Total</span>
+                    <span>₹{{ '{:,.0f}'.format(order.total + (0 if order.total > 999 else 150)) }}</span>
+                </div>
+            </div>
+
+            <div class="checkout-section" style="padding:20px;">
+                <h3 style="font-size:1rem; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-light);">Shipping Address</h3>
+                <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                    <strong>{{ order.shipping_address.full_name }}</strong><br>
+                    {{ order.shipping_address.address_line }}<br>
+                    {{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.pincode }}<br>
+                    Phone: {{ order.shipping_address.phone }}
+                </div>
+            </div>
+
+            <div class="checkout-section" style="padding:20px;">
+                <h3 style="font-size:1rem; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-light);">Payment Information</h3>
+                <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6;">
+                    Method: <strong>{{ 'Cash on Delivery' if order.payment_method == 'cod' else 'Online Payment' }}</strong><br>
+                    Status: <span class="status-badge {{ payment.status }}">{{ payment.status }}</span><br>
+                    Transaction ID: {{ payment.transaction_id }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

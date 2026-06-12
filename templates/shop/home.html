@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- ══ PROMO BANNERS ════════════════════════════════════════════ -->
+<section class="promo-banner-section">
+    <div class="container">
+        <!-- Main Banner -->
+        <div class="main-banner" style="background: linear-gradient(rgba(26,26,46,0.6), rgba(26,26,46,0.8)), url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat; min-height: 400px; display: flex; flex-direction: column; justify-content: center; padding: 48px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <h2 style="font-size: 3rem; margin-bottom: 16px; font-weight: 800; line-height: 1.2;">Exclusive <span style="color:#FFD700;">coupon</span> for you!</h2>
+            <p style="font-size: 1.3rem; margin-bottom: 32px; color: #E2E8F0; max-width: 500px;">Flat 10% Off up to ₹500 on your next purchase. Discover amazing products today.</p>
+            <div class="coupon-box" style="display: inline-block; padding: 14px 28px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 2px dashed #FFD700; border-radius: 8px; font-weight: bold; font-size: 1.25rem; color: #FFD700; max-width: max-content; letter-spacing: 2px;">USE CODE: SHOP10</div>
+        </div>
+        
+        <!-- Sub Banners -->
+        <div class="sub-banners" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 24px;">
+            <div class="sub-banner sub-banner-1" style="background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%), url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat; padding: 32px; border-radius: 16px; min-height: 220px; display: flex; flex-direction: column; justify-content: flex-end; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <h3 style="font-size: 1.6rem; margin-bottom: 8px; color: white; font-weight: 700;">Sports & Tech Sale</h3>
+                <p style="color: #FFD700; font-weight: 600; font-size: 1.1rem;">Min. 40% Off</p>
+            </div>
+            <div class="sub-banner sub-banner-2" style="background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%), url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat; padding: 32px; border-radius: 16px; min-height: 220px; display: flex; flex-direction: column; justify-content: flex-end; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <h3 style="font-size: 1.6rem; margin-bottom: 8px; color: white; font-weight: 700;">Limited time deals</h3>
+                <p style="color: #FFD700; font-weight: 600; font-size: 1.1rem;">From ₹799</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ CATEGORIES ══════════════════════════════════════════════ -->
+{% if categories %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Shop by <span class="highlight">Category</span></h2>
+            <a href="{{ url_for('shop.products') }}" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+        <div class="category-grid stagger">
+            {% for cat in categories %}
+            <a href="{{ url_for('shop.products', category=cat._id|string) }}" class="category-card">
+                <div class="cat-icon">
+                    {% if 'electronic' in cat.name|lower %}💻
+                    {% elif 'cloth' in cat.name|lower or 'fashion' in cat.name|lower or 'shirt' in cat.name|lower or 'dress' in cat.name|lower or 'top' in cat.name|lower %}👕
+                    {% elif 'shoe' in cat.name|lower %}👟
+                    {% elif 'watch' in cat.name|lower %}⌚
+                    {% elif 'bag' in cat.name|lower %}👜
+                    {% elif 'jewel' in cat.name|lower %}💎
+                    {% elif 'home' in cat.name|lower or 'kitchen' in cat.name|lower or 'furniture' in cat.name|lower %}🏠
+                    {% elif 'book' in cat.name|lower %}📚
+                    {% elif 'sport' in cat.name|lower %}⚽
+                    {% elif 'beauty' in cat.name|lower or 'skin' in cat.name|lower or 'fragrance' in cat.name|lower %}💄
+                    {% elif 'toy' in cat.name|lower %}🧸
+                    {% elif 'grocer' in cat.name|lower or 'food' in cat.name|lower %}🛒
+                    {% elif 'laptop' in cat.name|lower or 'tablet' in cat.name|lower or 'smartphone' in cat.name|lower or 'mobile' in cat.name|lower %}📱
+                    {% elif 'motorcycle' in cat.name|lower or 'vehicle' in cat.name|lower %}🏍️
+                    {% elif 'glass' in cat.name|lower %}🕶️
+                    {% else %}📦{% endif %}
+                </div>
+                <h3>{{ cat.name }}</h3>
+                <p>{{ cat.get('description', '')[:50] }}{% if cat.get('description', '')|length > 50 %}...{% endif %}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ══ FEATURED PRODUCTS ══════════════════════════════════════ -->
+{% if featured %}
+<section class="section">
+    <div class="container">
+        <div class="featured-wrapper">
+            <div class="container-fluid">
+                <div class="section-header">
+                    <h2 class="section-title">Still looking for these?</h2>
+                    <a href="{{ url_for('shop.products') }}" class="btn btn-primary btn-sm" style="background:#FFFFFF; color:#FBBF24;">View All →</a>
+                </div>
+                <div class="product-grid stagger">
+                    {% for product in featured %}
+                    {% include 'shop/_product_card.html' %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ══ LATEST PRODUCTS ════════════════════════════════════════ -->
+{% if latest %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">🆕 Latest <span class="highlight">Arrivals</span></h2>
+            <a href="{{ url_for('shop.products', sort='newest') }}" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+        <div class="product-grid stagger">
+            {% for product in latest %}
+            {% include 'shop/_product_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ══ CTA BANNER ═════════════════════════════════════════════ -->
+<section class="section" style="background: var(--bg-surface);">
+    <div class="container" style="text-align:center; padding: 40px 0;">
+        <h2 style="font-size:2rem; font-weight:800; margin-bottom:12px;">Ready to Start Shopping?</h2>
+        <p style="color:var(--text-secondary); max-width:500px; margin:0 auto 28px; font-size:1.05rem;">
+            Join thousands of happy customers and discover products you'll love.
+        </p>
+        {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+            Create Free Account
+        </a>
+        {% else %}
+        <a href="{{ url_for('shop.products') }}" class="btn btn-primary btn-lg">
+            Browse All Products
+        </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Manage Customers{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <!-- Reusing sidebar links -->
+        <div class="sidebar-label">Main Menu</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('admin.dashboard') }}"><i data-lucide="layout-dashboard" style="width:18px;height:18px"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('admin.orders') }}"><i data-lucide="shopping-bag" style="width:18px;height:18px"></i> Orders</a></li>
+            <li><a href="{{ url_for('admin.products') }}"><i data-lucide="package" style="width:18px;height:18px"></i> Products</a></li>
+            <li><a href="{{ url_for('admin.categories') }}"><i data-lucide="grid" style="width:18px;height:18px"></i> Categories</a></li>
+            <li><a href="{{ url_for('admin.customers') }}" class="active"><i data-lucide="users" style="width:18px;height:18px"></i> Customers</a></li>
+        </ul>
+        <div class="sidebar-label">Storefront</div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('shop.home') }}"><i data-lucide="external-link" style="width:18px;height:18px"></i> View Store</a></li>
+        </ul>
+    </aside>
+
+    <div class="admin-content fade-in">
+        <div class="page-header">
+            <h1>Customers</h1>
+            <p>View registered customers</p>
+        </div>
+
+        <div class="admin-table-card">
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Contact</th>
+                            <th>Orders</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                        <tr>
+                            <td>
+                                <div style="font-weight:600; color:var(--text-primary)">{{ customer.full_name or customer.username }}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted)">@{{ customer.username }}</div>
+                            </td>
+                            <td>
+                                <div>{{ customer.email }}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted)">{{ customer.phone or 'N/A' }}</div>
+                            </td>
+                            <td><span class="badge" style="background:var(--bg-input); padding:4px 10px; border-radius:12px;">{{ customer.order_count }}</span></td>
+                            <td>{{ customer.created_at.strftime('%b %d, %Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

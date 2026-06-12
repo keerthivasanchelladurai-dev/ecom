@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice - {{ order.order_number }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { background: #f4f4f8; }
+        .invoice-container { margin: 40px auto; max-width: 800px; }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <div>
+                <h1 class="invoice-title">ShopVerse</h1>
+                <p style="color:#6B6B85; font-size:0.85rem; margin-top:8px;">123 Commerce Avenue<br>Tech City, TC 10012<br>contact@shopverse.com</p>
+            </div>
+            <div style="text-align:right;" class="invoice-meta">
+                <h2 style="font-size:1.5rem; margin-bottom:12px; color:#1a1a2e;">INVOICE</h2>
+                <p><strong>Invoice No:</strong> {{ order.order_number }}</p>
+                <p><strong>Date:</strong> {{ order.created_at.strftime('%b %d, %Y') }}</p>
+                <p><strong>Status:</strong> <span style="text-transform:uppercase;">{{ payment.status }}</span></p>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-bottom:40px;">
+            <div>
+                <h3 style="font-size:0.9rem; color:#6B6B85; text-transform:uppercase; margin-bottom:8px;">Billed To:</h3>
+                <p style="font-weight:600; font-size:1rem;">{{ order.shipping_address.full_name }}</p>
+                <p style="font-size:0.85rem; color:#1a1a2e; margin-top:4px;">
+                    {{ order.shipping_address.address_line }}<br>
+                    {{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.pincode }}<br>
+                    Phone: {{ order.shipping_address.phone }}
+                </p>
+            </div>
+            <div style="text-align:right;">
+                <h3 style="font-size:0.9rem; color:#6B6B85; text-transform:uppercase; margin-bottom:8px;">Payment Method:</h3>
+                <p style="font-weight:600; font-size:1rem;">{{ 'Cash on Delivery' if order.payment_method == 'cod' else 'Online Payment' }}</p>
+                <p style="font-size:0.85rem; color:#1a1a2e; margin-top:4px;">Transaction: {{ payment.transaction_id }}</p>
+            </div>
+        </div>
+
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="text-align:center;">Qty</th>
+                    <th style="text-align:right;">Unit Price</th>
+                    <th style="text-align:right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.product_name }}</td>
+                    <td style="text-align:center;">{{ item.quantity }}</td>
+                    <td style="text-align:right;">₹{{ '{:,.2f}'.format(item.price) }}</td>
+                    <td style="text-align:right;">₹{{ '{:,.2f}'.format(item.price * item.quantity) }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3" style="text-align:right; border-bottom:none; padding-top:24px;">Subtotal</td>
+                    <td style="text-align:right; border-bottom:none; padding-top:24px;">₹{{ '{:,.2f}'.format(order.total) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:right; border-bottom:none;">Shipping</td>
+                    <td style="text-align:right; border-bottom:none;">₹{{ '{:,.2f}'.format(0 if order.total > 999 else 150) }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td colspan="3" style="text-align:right;">Total Amount</td>
+                    <td style="text-align:right; color:#6C5CE7; font-size:1.2rem;">₹{{ '{:,.2f}'.format(order.total + (0 if order.total > 999 else 150)) }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="invoice-footer">
+            <p>Thank you for shopping with ShopVerse!</p>
+            <p style="margin-top:4px; font-size:0.75rem;">This is a computer generated invoice and requires no signature.</p>
+        </div>
+
+        <div class="no-print" style="text-align:center; margin-top:40px;">
+            <button onclick="window.print()" class="btn btn-primary">Print Invoice</button>
+            <button onclick="window.close()" class="btn btn-outline" style="margin-left:10px;">Close</button>
+        </div>
+    </div>
+</body>
+</html>

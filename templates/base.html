@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ShopVerse — Premium Online Shopping. Discover amazing products at great prices.">
+    <title>{% block title %}ShopVerse{% endblock %} — Premium Shopping</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- ══ HEADER ══════════════════════════════════════════════ -->
+    <header class="site-header">
+        <nav class="navbar" id="main-navbar">
+        <div class="container">
+            <!-- Brand -->
+            <a href="{{ url_for('shop.home') }}" class="navbar-brand">
+                <div class="brand-icon">🛒</div>
+                ShopVerse
+            </a>
+
+            <!-- Search -->
+            <div class="navbar-search">
+                <span class="search-icon"><i data-lucide="search" style="width:18px;height:18px"></i></span>
+                <form action="{{ url_for('shop.products') }}" method="GET">
+                    <input type="text" name="q" id="search-input" placeholder="Search products..." value="{{ request.args.get('q', '') }}">
+                </form>
+            </div>
+
+            <!-- Actions -->
+            <div class="navbar-actions">
+                {% if current_user.is_authenticated %}
+                    <!-- Wishlist -->
+                    <a href="{{ url_for('wishlist.view_wishlist') }}" class="nav-action-btn" title="Wishlist">
+                        <i data-lucide="heart" style="width:20px;height:20px"></i>
+                    </a>
+
+                    <!-- Cart -->
+                    <a href="{{ url_for('cart.view_cart') }}" class="nav-action-btn" title="Cart">
+                        <i data-lucide="shopping-cart" style="width:20px;height:20px"></i>
+                        <span class="badge" id="cart-badge" style="{% if cart_count == 0 %}display:none{% endif %}">{{ cart_count }}</span>
+                    </a>
+
+                    <!-- User dropdown -->
+                    <div class="nav-user">
+                        <button class="nav-user-btn" type="button">
+                            <div class="nav-user-avatar">{{ current_user.username[0]|upper }}</div>
+                            <span>{{ current_user.username }}</span>
+                            <i data-lucide="chevron-down" style="width:14px;height:14px"></i>
+                        </button>
+                        <div class="nav-dropdown">
+                            {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin.dashboard') }}">
+                                <i data-lucide="layout-dashboard" style="width:16px;height:16px"></i> Admin Dashboard
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            {% endif %}
+                            <a href="{{ url_for('auth.profile') }}">
+                                <i data-lucide="user" style="width:16px;height:16px"></i> My Profile
+                            </a>
+                            <a href="{{ url_for('order.order_history') }}">
+                                <i data-lucide="package" style="width:16px;height:16px"></i> My Orders
+                            </a>
+                            <a href="{{ url_for('wishlist.view_wishlist') }}">
+                                <i data-lucide="heart" style="width:16px;height:16px"></i> Wishlist
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{{ url_for('auth.logout') }}">
+                                <i data-lucide="log-out" style="width:16px;height:16px"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="nav-auth-links">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline btn-sm" style="display:none;">Sign Up</a>
+                    </div>
+                    <button class="hamburger" id="hamburger" type="button">
+                        <span></span><span></span><span></span>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    <!-- ══ CATEGORY NAV (TOP) ═════════════════════════════════ -->
+    <nav class="category-nav">
+        <div class="container">
+            <ul class="category-nav-list">
+                <li>
+                    <a href="{{ url_for('shop.products') }}" class="{% if not request.args.get('category') and request.endpoint == 'shop.products' %}active{% endif %}">
+                        <i data-lucide="layout-grid" style="width:18px;height:18px;"></i>
+                        <span>For You</span>
+                    </a>
+                </li>
+                {% for cat in all_categories %}
+                <li>
+                    <a href="{{ url_for('shop.products', category=cat._id|string) }}" class="{% if request.args.get('category') == cat._id|string %}active{% endif %}">
+                        {% if 'electronic' in cat.name|lower %}<i data-lucide="monitor" style="width:18px;height:18px;"></i>
+                        {% elif 'cloth' in cat.name|lower or 'fashion' in cat.name|lower or 'shirt' in cat.name|lower or 'dress' in cat.name|lower or 'top' in cat.name|lower %}<i data-lucide="shirt" style="width:18px;height:18px;"></i>
+                        {% elif 'shoe' in cat.name|lower %}<i data-lucide="footprints" style="width:18px;height:18px;"></i>
+                        {% elif 'watch' in cat.name|lower %}<i data-lucide="watch" style="width:18px;height:18px;"></i>
+                        {% elif 'bag' in cat.name|lower %}<i data-lucide="briefcase" style="width:18px;height:18px;"></i>
+                        {% elif 'jewel' in cat.name|lower %}<i data-lucide="gem" style="width:18px;height:18px;"></i>
+                        {% elif 'home' in cat.name|lower or 'kitchen' in cat.name|lower or 'furniture' in cat.name|lower %}<i data-lucide="home" style="width:18px;height:18px;"></i>
+                        {% elif 'book' in cat.name|lower %}<i data-lucide="book" style="width:18px;height:18px;"></i>
+                        {% elif 'sport' in cat.name|lower %}<i data-lucide="dumbbell" style="width:18px;height:18px;"></i>
+                        {% elif 'beauty' in cat.name|lower or 'skin' in cat.name|lower or 'fragrance' in cat.name|lower %}<i data-lucide="sparkles" style="width:18px;height:18px;"></i>
+                        {% elif 'toy' in cat.name|lower %}<i data-lucide="gamepad-2" style="width:18px;height:18px;"></i>
+                        {% elif 'grocer' in cat.name|lower or 'food' in cat.name|lower %}<i data-lucide="shopping-basket" style="width:18px;height:18px;"></i>
+                        {% elif 'laptop' in cat.name|lower or 'tablet' in cat.name|lower or 'smartphone' in cat.name|lower or 'mobile' in cat.name|lower %}<i data-lucide="smartphone" style="width:18px;height:18px;"></i>
+                        {% elif 'motorcycle' in cat.name|lower or 'vehicle' in cat.name|lower %}<i data-lucide="bike" style="width:18px;height:18px;"></i>
+                        {% elif 'glass' in cat.name|lower %}<i data-lucide="glasses" style="width:18px;height:18px;"></i>
+                        {% else %}<i data-lucide="package" style="width:18px;height:18px;"></i>{% endif %}
+                        <span>{{ cat.name }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </nav>
+    </header>
+
+    <!-- ══ FLASH MESSAGES ═════════════════════════════════════ -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+            <span>{% if category == 'success' %}✓{% elif category == 'danger' %}✕{% elif category == 'warning' %}⚠{% else %}ℹ{% endif %}</span>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- ══ MAIN CONTENT ═══════════════════════════════════════ -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ══ FOOTER ═════════════════════════════════════════════ -->
+    {% if not request.endpoint or not request.endpoint.startswith('admin.') %}
+    {% block footer %}
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>🛒 ShopVerse</h3>
+                    <p>Your premium online shopping destination. Discover amazing products at unbeatable prices with fast delivery and excellent customer service.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="{{ url_for('shop.products') }}">All Products</a></li>
+                        <li><a href="{{ url_for('shop.products', sort='newest') }}">New Arrivals</a></li>
+                        <li><a href="{{ url_for('shop.products', sort='rating') }}">Top Rated</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Account</h4>
+                    <ul>
+                        {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('order.order_history') }}">My Orders</a></li>
+                        <li><a href="{{ url_for('wishlist.view_wishlist') }}">Wishlist</a></li>
+                        <li><a href="{{ url_for('cart.view_cart') }}">Cart</a></li>
+                        {% else %}
+                        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 ShopVerse. All rights reserved. Built with ♥</p>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- ══ BOTTOM NAVIGATION (MOBILE) ═════════════════════════ -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('shop.home') }}" class="bottom-nav-item {% if request.endpoint == 'shop.home' %}active{% endif %}">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('shop.products') }}" class="bottom-nav-item {% if request.endpoint == 'shop.products' %}active{% endif %}">
+            <i data-lucide="layout-grid"></i>
+            <span>Categories</span>
+        </a>
+        <a href="{{ url_for('cart.view_cart') }}" class="bottom-nav-item {% if request.endpoint == 'cart.view_cart' %}active{% endif %}">
+            <div class="icon-wrapper">
+                <i data-lucide="shopping-cart"></i>
+                <span class="badge" id="bottom-cart-badge" style="{% if cart_count == 0 %}display:none{% endif %}">{{ cart_count }}</span>
+            </div>
+            <span>Cart</span>
+        </a>
+        <a href="{{ url_for('wishlist.view_wishlist') }}" class="bottom-nav-item {% if request.endpoint == 'wishlist.view_wishlist' %}active{% endif %}">
+            <i data-lucide="heart"></i>
+            <span>Wishlist</span>
+        </a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('auth.profile') }}" class="bottom-nav-item {% if request.endpoint in ['auth.profile', 'order.order_history', 'admin.dashboard'] %}active{% endif %}">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}" class="bottom-nav-item {% if request.endpoint in ['auth.login', 'auth.register'] %}active{% endif %}">
+            <i data-lucide="user"></i>
+            <span>Login</span>
+        </a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>lucide.createIcons();</script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

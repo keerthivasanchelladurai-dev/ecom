@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Payment Gateway{% endblock %}
+
+{% block content %}
+<div class="payment-page">
+    <div class="payment-card fade-in">
+        <div class="payment-header">
+            <div style="width:60px; height:60px; background:var(--gradient-primary); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+                <i data-lucide="shield-check" style="width:32px;height:32px;color:white"></i>
+            </div>
+            <h2>Secure Payment Gateway</h2>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">Order #{{ order.order_number }}</p>
+            <div class="payment-amount mt-3">₹{{ '{:,.0f}'.format(payment.amount) }}</div>
+        </div>
+
+        <div class="mock-card-form">
+            <h3 style="font-size:0.9rem; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+                <i data-lucide="credit-card" style="width:16px;height:16px"></i> Enter Card Details
+            </h3>
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Card Number (e.g. 4111 1111 1111 1111)" value="4111 1111 1111 1111" readonly style="font-family:monospace; font-size:1rem; letter-spacing:2px;">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="MM/YY" value="12/28" readonly>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" placeholder="CVC" value="123" readonly>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <input type="text" class="form-control" placeholder="Name on Card" value="{{ order.shipping_address.full_name }}" readonly>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('payment.process_payment', order_id=order._id|string) }}" id="payment-form">
+            <button type="submit" class="btn btn-primary btn-block btn-lg" id="pay-btn">
+                Pay ₹{{ '{:,.0f}'.format(payment.amount) }} Securely
+            </button>
+        </form>
+
+        <p style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin-top:20px;">
+            This is a mock payment gateway. No real transaction will be processed. Clicking Pay will simulate a successful payment.
+        </p>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+    document.getElementById('payment-form').addEventListener('submit', function(e) {
+        const btn = document.getElementById('pay-btn');
+        btn.innerHTML = '<i data-lucide="loader" class="spin" style="width:18px;height:18px;animation:spin 1s linear infinite"></i> Processing...';
+        btn.style.opacity = '0.8';
+        btn.disabled = true;
+        // The form will submit normally after UI update
+    });
+</script>
+<style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+{% endblock %}

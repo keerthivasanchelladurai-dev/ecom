@@ -99,7 +99,9 @@ def _ensure_indexes(database):
     database.wishlist.create_index([('user_id', 1), ('product_id', 1)], unique=True)
 
 
+# ── Global App Instance for Gunicorn ───────────────────────────
+app = create_app()
+
 # ── Run ────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    application = create_app()
-    application.run(debug=True, port=5000)
+    app.run(debug=True, port=5000)

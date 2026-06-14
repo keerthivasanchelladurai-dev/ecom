@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_required, current_user
 from functools import wraps
 from models.product import get_products, get_product_by_id, create_product, update_product, delete_product
@@ -10,7 +10,9 @@ from bson import ObjectId
 from datetime import datetime, timezone, timedelta
 import csv
 import io
-
+import os
+import uuid
+from werkzeug.utils import secure_filename
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 
@@ -134,13 +136,23 @@ def add_product():
     categories = get_all_categories(db)
 
     if request.method == 'POST':
+        image_url = request.form.get('image_url', '').strip()
+        image_file = request.files.get('image_file')
+        if image_file and image_file.filename != '':
+            upload_folder = os.path.join(current_app.static_folder, 'uploads', 'products')
+            os.makedirs(upload_folder, exist_ok=True)
+            ext = image_file.filename.rsplit('.', 1)[-1].lower() if '.' in image_file.filename else 'jpg'
+            filename = f"{uuid.uuid4().hex}.{ext}"
+            image_file.save(os.path.join(upload_folder, filename))
+            image_url = f"/static/uploads/products/{filename}"
+
         data = {
             'name': request.form.get('name', '').strip(),
             'description': request.form.get('description', '').strip(),
             'price': request.form.get('price', 0),
             'compare_price': request.form.get('compare_price', 0),
             'stock': request.form.get('stock', 0),
-            'image_url': request.form.get('image_url', '').strip(),
+            'image_url': image_url,
             'featured': request.form.get('featured') == 'on',
             'rating': request.form.get('rating', 4.0),
         }
@@ -253,13 +265,23 @@ def edit_product(product_id):
     categories = get_all_categories(db)
 
     if request.method == 'POST':
+        image_url = request.form.get('image_url', '').strip()
+        image_file = request.files.get('image_file')
+        if image_file and image_file.filename != '':
+            upload_folder = os.path.join(current_app.static_folder, 'uploads', 'products')
+            os.makedirs(upload_folder, exist_ok=True)
+            ext = image_file.filename.rsplit('.', 1)[-1].lower() if '.' in image_file.filename else 'jpg'
+            filename = f"{uuid.uuid4().hex}.{ext}"
+            image_file.save(os.path.join(upload_folder, filename))
+            image_url = f"/static/uploads/products/{filename}"
+
         data = {
             'name': request.form.get('name', '').strip(),
             'description': request.form.get('description', '').strip(),
             'price': request.form.get('price', 0),
             'compare_price': request.form.get('compare_price', 0),
             'stock': request.form.get('stock', 0),
-            'image_url': request.form.get('image_url', '').strip(),
+            'image_url': image_url,
             'category_id': request.form.get('category_id', ''),
             'featured': request.form.get('featured') == 'on',
             'rating': request.form.get('rating', 4.0),
